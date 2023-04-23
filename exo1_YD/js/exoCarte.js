@@ -40,7 +40,7 @@ const section = createMarkup("section", "", main, [
 ]);
 
 /* 
-Création des 4 boutons de sélection dans le div html
+Création des 4 boutons de sélection dans le div de la page html
   div >
     button * 4
 */
@@ -73,6 +73,7 @@ function articleHtml() {
   let article_title = createMarkup("h2", "Article sur le HTML", article_html);
   let article_p = createMarkup("p", "", article_html);
 }
+
 function articleCss() {
   const article_css = createMarkup("article", "", section, [
     { name: "class", value: "article css" },
@@ -80,6 +81,7 @@ function articleCss() {
   let article_title = createMarkup("h2", "Article sur le CSS", article_css);
   let article_p = createMarkup("p", "", article_css);
 }
+
 function articleJs() {
   const article_js = createMarkup("article", "", section, [
     { name: "class", value: "article js" },
@@ -89,51 +91,52 @@ function articleJs() {
 }
 
 /* 
-Appel des fonctions pour générer les 16 articles
+Appel des fonctions pour générer les 16 articles dans la section
+articleHtml();
+articleCss();
+articleJs();
+articleHtml();
+articleJs();
+articleCss();
+articleHtml();
+articleJs();
+articleCss();
+articleCss();
+articleHtml();
+articleJs();
+articleHtml();
+articleCss();
+articleJs();
+articleJs();
 */
 
 
-articleHtml();
-articleCss();
-articleJs();
-articleHtml();
-articleJs();
-articleCss();
-articleHtml();
-articleJs();
-articleCss();
-articleCss();
-articleHtml();
-articleJs();
-articleHtml();
-articleCss();
-articleJs();
-articleJs();
-
-
-/* 
-Boucle infinie à corriger
-
+function getRandomInt (min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() *(max - min)) + min;
+}
 
 let i = 0;
 while (i < 16) {
-  const generate = (Math.random)*100;
+  const generate = getRandomInt (1, 4);
   console.log(generate);
-  if (generate < 34) {
+  if (generate === 1){
     articleHtml();
     i++;
-  } else if (generate < 67) {
+  } else if (generate === 2) {
     articleCss();
     i++;
-  } else if (generate < 100) {
+  } else if (generate === 3) {
     articleJs();
     i++;
-  } 
+  } else {
+    break;
+  }
 }
-*/
 
 
-
+/* Bouton Tous */
 buttonAll.onclick = async function (event) {
   event.preventDefault();
 
@@ -146,7 +149,7 @@ buttonAll.onclick = async function (event) {
 };
 
 
-
+/* Bouton HTML */
 buttonHtml.onclick = async function (event) {
   event.preventDefault();
 
@@ -168,7 +171,7 @@ buttonHtml.onclick = async function (event) {
 };
 
 
-
+/* Bouton CSS */
 buttonCss.onclick = async function (event) {
   event.preventDefault();
 
@@ -190,7 +193,7 @@ buttonCss.onclick = async function (event) {
 };
 
 
-
+/* Bouton JS */
 buttonJs.onclick = async function (event) {
   event.preventDefault();
 
