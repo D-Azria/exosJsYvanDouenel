@@ -1,17 +1,39 @@
 html {
-    background-color: beige;
-}
+  background-color: beige;
+  font-family: 'Roboto', sans-serif;
 
-
-form {
+  main {
     display: flex;
-    flex-wrap: wrap;
     flex-direction: column;
-    align-items: center;
-    width: 50%;
+    align-content: center;
 
-    select {
+    h1 {
+      align-self: center;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+
+      select {
         margin: 5px;
         width: 200px;
+      }
+
+      .cityArticle {
+        background-color: whitesmoke;
+        margin: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid black;
+
+        #cityFeaturedCP {
+            font-size: 1.3em;
+            font-weight: 400;
+        }
+      }
     }
+  }
 }

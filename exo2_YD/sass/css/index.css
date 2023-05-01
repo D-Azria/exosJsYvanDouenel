@@ -1,17 +1,35 @@
 html {
   background-color: beige;
+  font-family: "Roboto", sans-serif;
 }
-
-form {
+html main {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+}
+html main h1 {
+  align-self: center;
+}
+html main form {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
   align-items: center;
-  width: 50%;
 }
-form select {
+html main form select {
   margin: 5px;
   width: 200px;
+}
+html main form .cityArticle {
+  background-color: whitesmoke;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid black;
+}
+html main form .cityArticle #cityFeaturedCP {
+  font-size: 1.3em;
+  font-weight: 400;
 }
 
 /*# sourceMappingURL=index.css.map */

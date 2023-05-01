@@ -27,13 +27,15 @@ function createMarkup(markup_name, text, parent, attributes = []) {
 //
 //
 //création de la div contenant le formulaire
-const div = createMarkup("div", "", document.body);
+const main = createMarkup("main", "", document.body);
+const title = createMarkup("h1", "Informations", main);
+const div = createMarkup("div", "", main);
 
 //création du formulaire
 const form = createMarkup("form", "", div);
 
-//
 //// Régions
+//
 //
 // Sélecteur de la région
 const selectRegion = createMarkup("select", "", form, [
@@ -46,8 +48,8 @@ const chooseRegions = createMarkup(
   selectRegion
 );
 
-//
 //// Départements
+//
 //
 // Sélecteur du département
 const selectDepartement = createMarkup("select", "", form, [
@@ -60,8 +62,8 @@ const departement = createMarkup(
   selectDepartement
 );
 
-//
 //// Villes
+//
 //
 // Sélecteur de la ville
 const selectCity = createMarkup("select", "", form, [
@@ -70,18 +72,17 @@ const selectCity = createMarkup("select", "", form, [
 // Première option par défaut
 const city = createMarkup("option", "Choisir une ville", selectCity);
 
-//
-//
-////// Génération des options des sélecteurs par fetch des informations
+//// Génération des options des sélecteurs par fetch des informations
 //
 //
 // 1 Régions
 // 2 Départements
 // 3 Villes
 //
-// 1
 //
-// Options du sélecteur de régions
+//// 1 : Options du sélecteur de régions
+//
+//
 //
 // Récupération des régions avec fetch
 function getRegions() {
@@ -110,10 +111,9 @@ function getRegions() {
   );
 }
 
+//// 2 : Options du sélecteur de départements
 //
-// 2
 //
-// Options du sélecteur de départements
 //
 // Récupération des départements avec fetch
 function getDepartements(ofThisRegion) {
@@ -141,10 +141,9 @@ function getDepartements(ofThisRegion) {
   );
 }
 
+//// 3 : Options du sélecteur de villes
 //
-// 3
 //
-//// Options du sélecteur de villes
 //
 // Récupération des villes avec fetch
 function getCities(ofThisDepartement) {
@@ -172,7 +171,47 @@ function getCities(ofThisDepartement) {
   );
 }
 
-//
+function cityToFeature(ofThisDepartement, choosenCity) {
+  return (
+    fetch(`https://geo.api.gouv.fr/departements/${ofThisDepartement}/communes`)
+      .then((response) => {
+        if (response.status !== 200) {
+          throw new Error("Le serveur ne répond pas !");
+          //récupération des région sous forme d'un object json
+        } else return response.json();
+      })
+      //les données de la promesse résolue sont utilisée pour générer les options du sélecteur
+      .then((cities) => {
+        // console.log(choosenCity);
+        const city = cities.find((obj) => obj.nom === choosenCity);
+        const codesPostaux = city.codesPostaux;
+        const population = city.population;
+        const divCity = createMarkup("article", "", form, [
+          { name: "class", value: "cityArticle" },
+        ]);
+        const titleCity = createMarkup("h2", `${choosenCity}`, divCity, [
+          { name: "class", value: "cityFeatured" },
+        ]);
+        const codeCity = createMarkup(
+          "p",
+          `Code postal : ${codesPostaux}`,
+          divCity,
+          [
+            { name: "class", value: "cityFeatured" },
+            { name: "id", value: "cityFeaturedCP" },
+          ]
+        );
+        const popCity = createMarkup(
+          "p",
+          `Population : ${population}`,
+          divCity,
+          [{ name: "class", value: "cityFeatured" }]
+        );
+      })
+      .catch((error) => console.log(`Erreur catched :`, error))
+  );
+}
+
 // Dès le chargement de la page, les options de régions sont créées en appelant la fonction
 getRegions();
 
@@ -200,12 +239,34 @@ function clearCities() {
   }
 }
 
-//// Réaction à la sélection d'une région
+// Fonctions de nettoyage de la ville mise en avant
+function clearFeaturedCity() {
+  // Selection des éléments de la ville : classe cityFeatured. La longueur détermine le nombre de tour de boucle.
+  let i = document.querySelectorAll(".cityFeatured").length;
+  while (i > 0) {
+    console.log(i);
+    //suppression des éléments du DOM avec la classe cities
+    document.querySelector(".cityFeatured").remove();
+    i--;
+  }
+}
+function clearArticleFeaturedCity() {
+  let i = document.querySelectorAll(".cityArticle").length;
+  while (i > 0) {
+    console.log("cityArticle ", i);
+    document.querySelector(".cityArticle").remove();
+    i--;
+  }
+}
+
+//// Réactions à la sélection d'une région
+//
 //
 // 1 Création dun tableau avec les régions
 // 2 La région sélectionnée est lue, puis recherchée dans le tableau, et son id est extrait
 // 3 Les options de départements et de villes sont effacées s'il y en a
 // 4 Les départements sont fetchés en fonction de l'id de la région sélectionnée
+//
 //
 selectRegion.onchange = async function (event) {
   event.preventDefault();
@@ -246,6 +307,8 @@ selectRegion.onchange = async function (event) {
   clearDpt();
   // Supression des villes de la pages HTML
   clearCities();
+  clearFeaturedCity();
+  clearArticleFeaturedCity();
 
   //
   //// 4
@@ -255,16 +318,20 @@ selectRegion.onchange = async function (event) {
   return selectedRegion;
 };
 
-//// Réaction à la sélection d'un département
+// Déclaration d'une variable qui permettra de récupérer le numéro du département sélectionné
+let dptForCity;
+//// Réactions à la sélection d'un département
+//
 //
 // 1 Création dun tableau avec les départements
 // 2 Le département sélectionné est lu, puis recherché dans le tableau, et son id est extrait
 // 3 Les options de villes sont effacées s'il y en a
 // 4 Les villes sont fetchés en fonction de l'id du département sélectionné
 //
+//
 selectDepartement.onchange = async function (event) {
   event.preventDefault();
-  //
+
   //// 1
   //
   // Les départements ont été générées avec getDepartements() sur la page lors de la sélection de la région, ils apparaissent dans les "options" du sélecteur 'Département', avec la classe "departements"
@@ -279,7 +346,6 @@ selectDepartement.onchange = async function (event) {
   );
   console.log(`Affichage du tableau des départements`, arrayDpt);
 
-  //
   //// 2
   //
   // Le département sélectionné par l'utilisateur est lu
@@ -291,15 +357,15 @@ selectDepartement.onchange = async function (event) {
   );
   console.log(`Département sélectionné`, choosenDpt);
   console.log(`Id du département sélectionné`, choosenDpt.id);
+  dptForCity = choosenDpt.id;
 
-  //
   //// 3
   //
-  // Supression des villes de la pages HTML
+  // Suppression des villes de la pages HTML
+  // Suppression de la ville mise en avant
   clearCities();
-  //  fetchedCities.length
-
-  //
+  clearFeaturedCity();
+  clearArticleFeaturedCity();
   //// 4
   //
   // Les départements sont générés en fonction de l'id de la région sélectionnée
@@ -311,10 +377,10 @@ selectDepartement.onchange = async function (event) {
 //
 selectCity.onchange = async function (event) {
   event.preventDefault();
-  //
+
   //// 1
   //
-  // Les départements ont été générées avec getDepartements() sur la page lors de la sélection de la région, ils apparaissent dans les "options" du sélecteur 'Département', avec la classe "departements"
+  // Les villes ont été générées avec getCities() sur la page lors de la sélection du département, elles apparaissent dans les "options" du sélecteur 'Villes', avec la classe "departements"
   // Un tableau contenant ces département est créé, avec leur id et leur nom
   const arrayCities = Array.from(document.querySelectorAll(`.cities`)).map(
     (city) => {
@@ -326,7 +392,6 @@ selectCity.onchange = async function (event) {
   );
   //console.log(`Affichage du tableau des villes : `, arrayCities);
 
-  //
   //// 2
   //
   // La ville sélectionnée par l'utilisateur est lue
@@ -336,64 +401,20 @@ selectCity.onchange = async function (event) {
   const choosenCity = arrayCities.find(
     ({ value }) => value === `${selectedCity}`
   );
-  console.log(`Ville sélectionnée : `, choosenCity);
+  console.log(`Ville sélectionnée : `, choosenCity.value);
   console.log(`Id de la ville sélectionnée : `, choosenCity.id);
 
-  //
   //// 3
   //
   //
   // Supression de la ville affichée s'il y en a une
+  clearFeaturedCity();
+  clearArticleFeaturedCity();
 
   //
   //// 4
   //
   // La fiche de la ville est générée en fonction de la ville sélectionnée
-  //
-  //
-  
-  //
-  //
-  getFeaturedCity(18);
-  cityToFeature("Achères");
+  cityToFeature(dptForCity, choosenCity.value);
   //  return selectedCity;
 };
-const fetchedCities = [];
-async function getFeaturedCity(ofThisDepartement) {
-  return (
-    fetch(
-      `https://geo.api.gouv.fr/departements/${ofThisDepartement}/communes`
-    )
-      .then((response) => {
-        if (response.status !== 200) {
-          throw new Error("Le serveur ne répond pas !");
-          //récupération des région sous forme d'un object json
-        } else return response.json();
-      })
-      //les données de la promesse résolue sont utilisée pour générer les options du sélecteur
-      .then((cities) => {
-        fetchedCities.push(cities);
-        console.log(fetchedCities);
-      })
-      .catch((error) => console.log(`Erreur catched :`, error))
-  );
-}
-
-async function cityToFeature(chooseCity) {
-  await fetchedCities.find(({ value }) => value === `${chooseCity}`);
-  console.log(`Ville sélectionnée`, chooseCity);
-  console.log(`Code de la ville sélectionnée`, chooseCity.code);
-  console.log(`Population de `, chooseCity, ` : `, chooseCity.population);
-}
-
-const article = createMarkup("article", "Test", div);
-
-
-class allFetchedCities {
-  constructor (nom, code, codesPostaux, population) {
-    this.nom = nom;
-    this.code = code;
-    this.codesPostaux = codesPostaux;
-    this.population = population;
-  }
-}
