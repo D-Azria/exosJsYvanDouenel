@@ -167,9 +167,9 @@ function getCities(ofThisDepartement) {
 
 // Fonction permettant de générer la carte affichant les informations des villes.
 // L'affichage se fera en fonction de la ville sélectionnée, le département est utilisé pour réalisé le bon fetch
-function cityToFeature(cityCode) {
+function cityToFeature(ofThisDepartement, choosenCity) {
   return (
-    fetch(`https://geo.api.gouv.fr/communes/${cityCode}`)
+    fetch(`https://geo.api.gouv.fr/departements/${ofThisDepartement}/communes`)
       .then((response) => {
         if (response.status !== 200) {
           throw new Error("Le serveur ne répond pas !");
@@ -177,15 +177,15 @@ function cityToFeature(cityCode) {
         } else return response.json();
       })
       //les données de la promesse résolue sont utilisée pour générer les récupérer les informations à afficher
-      .then((city) => {
+      .then((cities) => {
         // Recherche dans le json de la ville sélectionnée par l'utilisateur
-        const nom = city.nom;
+        const city = cities.find((obj) => obj.nom === choosenCity);
         const codesPostaux = city.codesPostaux;
         const population = city.population;
         const divCity = createMarkup("article", "", form, [
           { name: "class", value: "cityArticle" },
         ]);
-        const titleCity = createMarkup("h2", `${nom}`, divCity, [
+        const titleCity = createMarkup("h2", `${choosenCity}`, divCity, [
           { name: "class", value: "cityFeatured" },
         ]);
         const codeCity = createMarkup(
@@ -304,6 +304,8 @@ selectRegion.onchange = async function (event) {
   getDepartements(choosenRegion.id);
 };
 
+// Déclaration d'une variable qui permettra de récupérer le numéro du département sélectionné
+let dptForCity;
 //// Réactions à la sélection d'un département
 //
 //
@@ -335,11 +337,12 @@ selectDepartement.onchange = async function (event) {
   //
   // Le département sélectionné par l'utilisateur est lu
   const selectedDepartement = selectDepartement.value;
+  console.log(`Nom du département sélectionné`, selectedDepartement);
   // Le département sélectionné est extrait du tableau des départements
   const choosenDpt = arrayDpt.find(
     ({ value }) => value === `${selectedDepartement}`
   );
-  // dptForCity = choosenDpt.id;
+  dptForCity = choosenDpt.id;
 
   //// 3
   //
@@ -360,7 +363,6 @@ selectDepartement.onchange = async function (event) {
 //// Réaction à la sélection d'une ville
 //
 //
-// 1 Un tabealeau avec les villes présente dans les options du sélecteur de ville est fait
 // 1 La ville sélectionnée est lue
 // 2 La ville mise en avant est effacée s'il y en a
 // 3 Les villes sont fetchés en fonction de l'id du département sélectionné, la carte de la ville est générée
@@ -369,40 +371,24 @@ selectDepartement.onchange = async function (event) {
 selectCity.onchange = async function (event) {
   event.preventDefault();
 
-  //// 1 Création d'un tableau
-  //  
-  //  
-  // Les villes ont été générées avec getDepartements() sur la page lors de la sélection du département, elles apparaissent dans les "options" du sélecteur 'Ville', avec la classe "cities"
-  // Un tableau contenant ces villes est créé, avec leur id et leur nom
-  const arrayCities = Array.from(document.querySelectorAll(`.cities`)).map(
-    (city) => {
-      return {
-        id: city.id,
-        value: city.value,
-      };
-    }
-  );
-
-  //// 2
+  //// 1
   //
   //
+  // Les villes ont été générées avec getCities() sur la page lors de la sélection du département, elles apparaissent dans les "options" du sélecteur 'Villes', avec la classe "departements"
   // La ville sélectionnée par l'utilisateur est lue
   const selectedCity = selectCity.value;
-  // La ville sélectionnée est extraite du tableau des villes
-  const choosenCity = arrayCities.find(
-    ({ value }) => value === `${selectedCity}`
-  );
 
-  //// 3
+
+  //// 2
   //
   //
   // Supression de la ville affichée s'il y en a une
   clearFeaturedCity();
   clearArticleFeaturedCity();
 
-  //// 4
+  //// 3
   //
   //
   // La fiche de la ville est générée en fonction de la ville sélectionnée
-  cityToFeature(choosenCity.id);
+  cityToFeature(dptForCity, selectedCity);
 };
