@@ -23,13 +23,12 @@ function createMarkup(markup_name, text, parent, attributes = []) {
   return markup;
 }
 
-/* 
-Structure de la page html:
-main >
-  h1
-  div
-  section
-*/
+// Structure de la page html
+// main >
+//   h1
+//   div
+//   section
+//
 const main = createMarkup("main", "", document.body, [
   { name: "class", value: "main d-flex" },
 ]);
@@ -39,33 +38,36 @@ const section = createMarkup("section", "", main, [
   { name: "class", value: "section d-flex" },
 ]);
 
-/* 
-Création des 4 boutons de sélection dans le div de la page html
-  div >
-    button * 4
-*/
+// Création des 4 boutons de sélection dans le div de la page html
+//  div >
+//    button * 4
+//
+// Bouton pour sélectionner tous les articles
 const buttonAll = createMarkup("button", "Tous", div, [
   { name: "class", value: "btn" },
   { name: "id", value: `all` },
 ]);
+// Bouton pour sélectionner seulement les articles HTML
 const buttonHtml = createMarkup("button", "HTML", div, [
   { name: "class", value: "btn" },
   { name: "id", value: `html` },
 ]);
+// Bouton pour sélectionner seulement les articles CSS
 const buttonCss = createMarkup("button", "CSS", div, [
   { name: "class", value: "btn" },
   { name: "id", value: `css` },
 ]);
+// Bouton pour sélectionner seulement les articles JS
 const buttonJs = createMarkup("button", "JS", div, [
   { name: "class", value: "btn" },
   { name: "id", value: `js` },
 ]);
 
-/* 
-Création des fonctions de génération des articles qui apparaitont dans la balise section sur la page html
-  section >
-    article * 16
-*/
+// Création des fonctions de génération des articles qui apparaitont dans la balise section sur la page html
+//  section >
+//    article * 16
+//
+// Fonction qui génère un article HTML
 function articleHtml() {
   const article_html = createMarkup("article", "", section, [
     { name: "class", value: "article html" },
@@ -74,6 +76,7 @@ function articleHtml() {
   let article_p = createMarkup("p", "", article_html);
 }
 
+// Fonction qui génère un article CSS
 function articleCss() {
   const article_css = createMarkup("article", "", section, [
     { name: "class", value: "article css" },
@@ -82,46 +85,31 @@ function articleCss() {
   let article_p = createMarkup("p", "", article_css);
 }
 
+// Fonction qui génère un article JS
 function articleJs() {
   const article_js = createMarkup("article", "", section, [
     { name: "class", value: "article js" },
   ]);
-  let article_title = createMarkup("h2", "Article sur le Javascript", article_js);
+  let article_title = createMarkup(
+    "h2",
+    "Article sur le Javascript",
+    article_js
+  );
   let article_p = createMarkup("p", "", article_js);
 }
 
-/* 
-Appel des fonctions pour générer les 16 articles dans la section
-articleHtml();
-articleCss();
-articleJs();
-articleHtml();
-articleJs();
-articleCss();
-articleHtml();
-articleJs();
-articleCss();
-articleCss();
-articleHtml();
-articleJs();
-articleHtml();
-articleCss();
-articleJs();
-articleJs();
-*/
-
-
-function getRandomInt (min, max) {
+// Fonction permettant d'obtenir des nombres entiers aléatoires entre 1 et 3
+function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() *(max - min)) + min;
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
+// Boucle qui génère de manière aléatoire des articles en fonction des résultats obtenus par getRandomInt
 let i = 0;
 while (i < 16) {
-  const generate = getRandomInt (1, 4);
-  console.log(generate);
-  if (generate === 1){
+  const generate = getRandomInt(1, 4);
+  if (generate === 1) {
     articleHtml();
     i++;
   } else if (generate === 2) {
@@ -135,93 +123,71 @@ while (i < 16) {
   }
 }
 
-
-/* Bouton Tous */
+// Bouton Tous
 buttonAll.onclick = async function (event) {
   event.preventDefault();
 
-  /* sélectionne les éléments avec la balise article */
+  // sélectionne les éléments avec la balise article
   const elements = document.querySelectorAll("article");
-  /* pour chaque élément, mets la valeur hidden sur false = affiche sur la page html */
+  // pour chaque élément, mets la valeur hidden sur false = affiche sur la page html
   elements.forEach((element) => {
     element.hidden = false;
   });
 };
 
-
-/* Bouton HTML */
+// Bouton HTML
 buttonHtml.onclick = async function (event) {
   event.preventDefault();
 
-  /* sélectionne les éléments avec la balise article */
+  // sélectionne les éléments avec la balise article
   const allElements = document.querySelectorAll("article");
-  /*
-    pour chaque élément, mets la valeur hidden sur true = cache tout sur la page html
-    */
+  //  pour chaque élément, mets la valeur hidden sur true = cache tout sur la page html
   allElements.forEach((element) => {
     element.hidden = true;
   });
 
-  /* sélectionne les éléments avec la class html dans les balise article */
+  //sélectionne les éléments avec la class html dans les balise article
   const elements = document.querySelectorAll("article.html");
-  /*  permet l'affichage des éléments sélectionné */
+  //  permet l'affichage des éléments sélectionné
   elements.forEach((element) => {
     element.hidden = false;
   });
 };
 
-
-/* Bouton CSS */
+// Bouton CSS
 buttonCss.onclick = async function (event) {
   event.preventDefault();
 
-  /* sélectionne les éléments avec la balise article */
+  // sélectionne les éléments avec la balise article
   const allElements = document.querySelectorAll("article");
-  /*
-    pour chaque élément, mets la valeur hidden sur true = cache tout sur la page html
-    */
+  //pour chaque élément, mets la valeur hidden sur true = cache tout sur la page html
   allElements.forEach((element) => {
     element.hidden = true;
   });
 
-  /* sélectionne les éléments avec la class css dans les balise article */
+  // sélectionne les éléments avec la class css dans les balise article
   const elements = document.querySelectorAll("article.css");
-  /*  permet l'affichage des éléments sélectionné */
+  //  permet l'affichage des éléments sélectionné
   elements.forEach((element) => {
     element.hidden = false;
   });
 };
 
-
-/* Bouton JS */
+// Bouton JS
 buttonJs.onclick = async function (event) {
   event.preventDefault();
 
-  /* sélectionne les éléments avec la balise article */
+  // sélectionne les éléments avec la balise article
   const allElements = document.querySelectorAll("article");
-  /*
-    pour chaque élément, mets la valeur hidden sur true = cache tout sur la page html
-    */
+  // pour chaque élément, mets la valeur hidden sur true = cache tout sur la page html
   allElements.forEach((element) => {
     element.hidden = true;
   });
 
-  /* sélectionne les éléments avec la class js dans les balise article */
+  // sélectionne les éléments avec la class js dans les balise article
   const elements = document.querySelectorAll("article.js");
-  /*  permet l'affichage des éléments sélectionné */
+  //  permet l'affichage des éléments sélectionné
   elements.forEach((element) => {
     element.hidden = false;
   });
 };
- 
-
-/* 
-Test en utilisant le code de MDN, non fonctionnel
-
-document.getElementById("html").addEventListener("click", function () {
-  document.querySelectorAll(".article").hidden = true;
-  document.querySelectorAll(".html").hidden = false;
-}, false);
- */
-
-

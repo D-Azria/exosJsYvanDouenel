@@ -103,8 +103,6 @@ function getRegions() {
             { name: "name", value: `${region.nom}` },
             { name: "class", value: "regions" },
           ]);
-          //vérification en console du succès de la récupération de chaque région individuellement
-          console.log(region);
         });
       })
       .catch((error) => console.log(`Erreur catched :`, error))
@@ -122,19 +120,17 @@ function getDepartements(ofThisRegion) {
       .then((response) => {
         if (response.status !== 200) {
           throw new Error("Le serveur ne répond pas !");
-          //récupération des région sous forme d'un object json
+          //récupération des départements sous forme d'un object json
         } else return response.json();
       })
       //les données de la promesse résolue sont utilisée pour générer les options du sélecteur
       .then((departements) => {
-        //pour chaque région, une createMarkup permet de générer une option avec le département, l'id étant le code de la région
+        //pour chaque département, une createMarkup permet de générer une option
         departements.forEach((departement) => {
           createMarkup("option", departement.nom, selectDepartement, [
             { name: "id", value: `${departement.code}` },
             { name: "class", value: "departements" },
           ]);
-          //vérification en console du succès de la récupération de chaque département individuellement
-          console.log(departement);
         });
       })
       .catch((error) => console.log(`Erreur catched :`, error))
@@ -152,37 +148,37 @@ function getCities(ofThisDepartement) {
       .then((response) => {
         if (response.status !== 200) {
           throw new Error("Le serveur ne répond pas !");
-          //récupération des région sous forme d'un object json
+          //récupération des villes sous forme d'un object json
         } else return response.json();
       })
       //les données de la promesse résolue sont utilisée pour générer les options du sélecteur
       .then((cities) => {
-        //pour chaque région, une createMarkup permet de générer une option avec le département, l'id étant le code de la région
+        //pour chaque ville, une createMarkup permet de générer une option
         cities.forEach((city) => {
           createMarkup("option", city.nom, selectCity, [
             { name: "id", value: `${city.code}` },
             { name: "class", value: "cities" },
           ]);
-          //vérification en console du succès de la récupération de chaque département individuellement
-          console.log(city);
         });
       })
       .catch((error) => console.log(`Erreur catched :`, error))
   );
 }
 
+// Fonction permettant de générer la carte affichant les informations des villes.
+// L'affichage se fera en fonction de la ville sélectionnée, le département est utilisé pour réalisé le bon fetch
 function cityToFeature(ofThisDepartement, choosenCity) {
   return (
     fetch(`https://geo.api.gouv.fr/departements/${ofThisDepartement}/communes`)
       .then((response) => {
         if (response.status !== 200) {
           throw new Error("Le serveur ne répond pas !");
-          //récupération des région sous forme d'un object json
+          //récupération des villes sous forme d'un object json
         } else return response.json();
       })
-      //les données de la promesse résolue sont utilisée pour générer les options du sélecteur
+      //les données de la promesse résolue sont utilisée pour générer les récupérer les informations à afficher
       .then((cities) => {
-        // console.log(choosenCity);
+        // Recherche dans le json de la ville sélectionnée par l'utilisateur
         const city = cities.find((obj) => obj.nom === choosenCity);
         const codesPostaux = city.codesPostaux;
         const population = city.population;
@@ -220,7 +216,6 @@ function clearDpt() {
   // Selection des départements : classe departements. La longueur détermine le nombre de tour de boucle.
   let i = document.querySelectorAll(".departements").length;
   while (i > 0) {
-    console.log(i);
     //suppression des éléments du DOM avec la classe departements
     document.querySelector(".departements").remove();
     i--;
@@ -232,7 +227,6 @@ function clearCities() {
   // Selection des villes : classe cities. La longueur détermine le nombre de tour de boucle.
   let i = document.querySelectorAll(".cities").length;
   while (i > 0) {
-    console.log(i);
     //suppression des éléments du DOM avec la classe cities
     document.querySelector(".cities").remove();
     i--;
@@ -244,7 +238,6 @@ function clearFeaturedCity() {
   // Selection des éléments de la ville : classe cityFeatured. La longueur détermine le nombre de tour de boucle.
   let i = document.querySelectorAll(".cityFeatured").length;
   while (i > 0) {
-    console.log(i);
     //suppression des éléments du DOM avec la classe cities
     document.querySelector(".cityFeatured").remove();
     i--;
@@ -253,7 +246,6 @@ function clearFeaturedCity() {
 function clearArticleFeaturedCity() {
   let i = document.querySelectorAll(".cityArticle").length;
   while (i > 0) {
-    console.log("cityArticle ", i);
     document.querySelector(".cityArticle").remove();
     i--;
   }
@@ -270,8 +262,9 @@ function clearArticleFeaturedCity() {
 //
 selectRegion.onchange = async function (event) {
   event.preventDefault();
-  //
+  
   //// 1
+  //
   //
   // Les régions ont été générées avec getRegions() sur la page dans les "options" du sélecteur 'Régions', avec la classe "regions"
   // Un tableau contenant ces régions est créé, avec leur id et leur nom
@@ -283,23 +276,17 @@ selectRegion.onchange = async function (event) {
       };
     }
   );
-  console.log(`Affichage du tableau des régions`, arrayReg);
 
-  //
   //// 2
+  //
   //
   // La région sélectionnée par l'utilisateur est lue
   const selectedRegion = selectRegion.value;
-  // Vérification en console
-  console.log(`Nom de la région sélectionnée`, selectedRegion);
   // La région sélectionnée est extraite du tableau des régions
   const choosenRegion = arrayReg.find(
     ({ value }) => value === `${selectedRegion}`
   );
-  console.log(`Région sélectionnée`, choosenRegion);
-  console.log(`Id de la région sélectionnée`, choosenRegion.id);
 
-  //
   //// 3
   //
   //
@@ -310,12 +297,11 @@ selectRegion.onchange = async function (event) {
   clearFeaturedCity();
   clearArticleFeaturedCity();
 
-  //
   //// 4
+  //
   //
   // Les départements sont générés en fonction de l'id de la région sélectionnée
   getDepartements(choosenRegion.id);
-  return selectedRegion;
 };
 
 // Déclaration d'une variable qui permettra de récupérer le numéro du département sélectionné
@@ -334,6 +320,7 @@ selectDepartement.onchange = async function (event) {
 
   //// 1
   //
+  //
   // Les départements ont été générées avec getDepartements() sur la page lors de la sélection de la région, ils apparaissent dans les "options" du sélecteur 'Département', avec la classe "departements"
   // Un tableau contenant ces département est créé, avec leur id et leur nom
   const arrayDpt = Array.from(document.querySelectorAll(`.departements`)).map(
@@ -344,9 +331,9 @@ selectDepartement.onchange = async function (event) {
       };
     }
   );
-  console.log(`Affichage du tableau des départements`, arrayDpt);
 
   //// 2
+  //
   //
   // Le département sélectionné par l'utilisateur est lu
   const selectedDepartement = selectDepartement.value;
@@ -355,66 +342,53 @@ selectDepartement.onchange = async function (event) {
   const choosenDpt = arrayDpt.find(
     ({ value }) => value === `${selectedDepartement}`
   );
-  console.log(`Département sélectionné`, choosenDpt);
-  console.log(`Id du département sélectionné`, choosenDpt.id);
   dptForCity = choosenDpt.id;
 
   //// 3
+  //
   //
   // Suppression des villes de la pages HTML
   // Suppression de la ville mise en avant
   clearCities();
   clearFeaturedCity();
   clearArticleFeaturedCity();
+
   //// 4
+  //
   //
   // Les départements sont générés en fonction de l'id de la région sélectionnée
   getCities(choosenDpt.id);
-  return choosenDpt.id;
 };
 
 //// Réaction à la sélection d'une ville
+//
+//
+// 1 La ville sélectionnée est lue
+// 2 La ville mise en avant est effacée s'il y en a
+// 3 Les villes sont fetchés en fonction de l'id du département sélectionné, la carte de la ville est générée
+//
 //
 selectCity.onchange = async function (event) {
   event.preventDefault();
 
   //// 1
   //
-  // Les villes ont été générées avec getCities() sur la page lors de la sélection du département, elles apparaissent dans les "options" du sélecteur 'Villes', avec la classe "departements"
-  // Un tableau contenant ces département est créé, avec leur id et leur nom
-  const arrayCities = Array.from(document.querySelectorAll(`.cities`)).map(
-    (city) => {
-      return {
-        id: city.id,
-        value: city.value,
-      };
-    }
-  );
-  //console.log(`Affichage du tableau des villes : `, arrayCities);
-
-  //// 2
   //
+  // Les villes ont été générées avec getCities() sur la page lors de la sélection du département, elles apparaissent dans les "options" du sélecteur 'Villes', avec la classe "departements"
   // La ville sélectionnée par l'utilisateur est lue
   const selectedCity = selectCity.value;
-  console.log(`Nom de la ville sélectionnée : `, selectedCity);
-  // La ville sélectionnée est extraite du tableau des villes
-  const choosenCity = arrayCities.find(
-    ({ value }) => value === `${selectedCity}`
-  );
-  console.log(`Ville sélectionnée : `, choosenCity.value);
-  console.log(`Id de la ville sélectionnée : `, choosenCity.id);
 
-  //// 3
+
+  //// 2
   //
   //
   // Supression de la ville affichée s'il y en a une
   clearFeaturedCity();
   clearArticleFeaturedCity();
 
+  //// 3
   //
-  //// 4
   //
   // La fiche de la ville est générée en fonction de la ville sélectionnée
-  cityToFeature(dptForCity, choosenCity.value);
-  //  return selectedCity;
+  cityToFeature(dptForCity, selectedCity);
 };
